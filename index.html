@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>تحليل مواضيع الاختبار</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f3f5f9; --card:#fff; --ink:#1d2433; --muted:#667085; --line:#d9dee8;
+  --pri:#1f5fae; --pri-soft:#e7effa;
+  --res:#2b6cb0; --res-soft:#e6f0fb;
+  --comp:#b7791f; --comp-soft:#fdf3e1;
+  --ok:#1f8a4c; --ok-soft:#e3f5ea; --bad:#c0392b; --bad-soft:#fbe8e6; --warn:#b7791f; --warn-soft:#fdf3e1;
+  --r:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:'Cairo',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;font-size:16px}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer}
+.top{background:linear-gradient(135deg,#173f73,#1f5fae);color:#fff;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.top h1{margin:0;font-size:1.35rem;font-weight:800}
+.top .sub{opacity:.85;font-size:.9rem}
+.top .acts{display:flex;gap:8px;flex-wrap:wrap}
+.tbtn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:10px;padding:6px 12px;font-weight:600}
+.tbtn:hover{background:rgba(255,255,255,.25)}
+main{max-width:1180px;margin:0 auto;padding:22px 16px 60px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px;box-shadow:0 1px 2px rgba(16,24,40,.04)}
+h2{margin:0 0 6px;font-size:1.3rem}
+h3{margin:0 0 12px;font-size:1.1rem}
+.muted{color:var(--muted)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+label.f{display:flex;flex-direction:column;gap:4px;font-weight:600;font-size:.92rem}
+label.f input,label.f select{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:#fff;font-weight:400}
+.chk{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fafbfd}
+.chk input{margin-top:6px;width:18px;height:18px}
+.btn{border:none;border-radius:11px;padding:10px 18px;font-weight:700;background:var(--pri);color:#fff;transition:.15s}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:#fff;color:var(--pri);border:1.5px solid var(--pri)}
+.btn.soft{background:var(--pri-soft);color:var(--pri)}
+.btn.danger{background:#fff;color:var(--bad);border:1.5px solid #e9b7b1}
+.btn.big{padding:13px 26px;font-size:1.05rem}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.spacer{flex:1}
+
+/* steps */
+.steps{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.step{flex:1;min-width:150px;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:8px 12px;text-align:right;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.step b{font-weight:700}
+.step .cnt{background:var(--bg);border-radius:20px;padding:0 10px;font-size:.85rem;color:var(--muted);white-space:nowrap}
+.step.on{border-color:var(--pri);background:var(--pri-soft)}
+.step.on .cnt{background:#fff;color:var(--pri)}
+.step.done{border-color:#a9d8bb}
+
+.layout{display:grid;grid-template-columns:1fr 300px;gap:16px;align-items:start}
+@media(max-width:860px){.layout{grid-template-columns:1fr}}
+.qhead{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.secname{background:var(--pri);color:#fff;border-radius:8px;padding:2px 12px;font-weight:700;font-size:.9rem}
+.qtitle{font-size:1.6rem;font-weight:800;display:flex;align-items:center;gap:8px}
+.qtitle input{width:90px;border:1.5px dashed var(--line);border-radius:10px;padding:0 8px;font-size:1.5rem;font-weight:800;text-align:center;background:#fafbfd}
+.qtitle input:focus{outline:none;border-color:var(--pri);border-style:solid}
+.editing{background:var(--warn-soft);color:var(--warn);border-radius:8px;padding:2px 10px;font-size:.85rem;font-weight:700}
+.prompt{color:var(--muted);margin:2px 0 14px}
+.levels{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:600px){.levels{grid-template-columns:1fr 1fr}}
+.lv{position:relative;border:2px solid var(--line);background:#fff;border-radius:14px;padding:14px 12px 12px;text-align:right;transition:.12s;min-height:96px}
+.lv .nm{font-size:1.25rem;font-weight:800;display:block}
+.lv .ds{font-size:.82rem;color:var(--muted);display:block;line-height:1.45}
+.lv .key{position:absolute;left:10px;top:10px;font-size:.75rem;border:1px solid var(--line);border-radius:6px;padding:0 6px;color:var(--muted)}
+.lv.res .nm{color:var(--res)} .lv.comp .nm{color:var(--comp)}
+.lv.res:hover{border-color:var(--res);background:var(--res-soft)}
+.lv.comp:hover{border-color:var(--comp);background:var(--comp-soft)}
+.lv.sel.res{border-color:var(--res);background:var(--res);} .lv.sel.comp{border-color:var(--comp);background:var(--comp)}
+.lv.sel .nm,.lv.sel .ds{color:#fff} .lv.sel .key{color:#fff;border-color:rgba(255,255,255,.6)}
+.lv.flash{transform:scale(.97)}
+.lv.inc.res{border-color:var(--res);background:var(--res-soft)} .lv.inc.comp{border-color:var(--comp);background:var(--comp-soft)}
+.lv.inc::after{content:'✓ تلقائيا';position:absolute;left:10px;bottom:8px;font-size:.72rem;font-weight:700;color:var(--muted)}
+.grouplbl{grid-column:1/-1;font-size:.85rem;font-weight:700;margin:4px 0 -4px}
+.grouplbl.res{color:var(--res)} .grouplbl.comp{color:var(--comp)}
+.subq{margin-top:16px;padding-top:14px;border-top:1px dashed var(--line)}
+.subq h4{margin:0 0 8px;font-size:.95rem}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1.5px solid var(--line);background:#fff;border-radius:22px;padding:5px 14px;font-weight:600}
+.chip:hover{border-color:var(--pri)}
+.chip.sel{background:var(--pri);border-color:var(--pri);color:#fff}
+.chip.yes.sel{background:var(--ok);border-color:var(--ok)} .chip.no.sel{background:var(--bad);border-color:var(--bad)}
+.txt{width:100%;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:#fafbfd}
+.navbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px;padding-top:16px;border-top:1px solid var(--line)}
+.side h3{display:flex;justify-content:space-between}
+.qlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;max-height:380px;overflow:auto}
+.qlist li button{width:100%;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--line);background:#fff;border-radius:10px;padding:6px 10px;text-align:right}
+.qlist li button:hover{border-color:var(--pri)}
+.qlist li.cur button{border-color:var(--pri);background:var(--pri-soft)}
+.tag{border-radius:7px;padding:0 8px;font-size:.82rem;font-weight:700}
+.tag.res{background:var(--res-soft);color:var(--res)} .tag.comp{background:var(--comp-soft);color:var(--comp)} .tag.none{background:var(--bg);color:var(--muted)}
+.mini{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:14px}
+.mini div{background:var(--bg);border-radius:10px;padding:6px;text-align:center;font-size:.8rem}
+.mini b{display:block;font-size:1.15rem}
+.kbd{font-size:.8rem;color:var(--muted);margin-top:12px}
+
+/* modal */
+#modal{position:fixed;inset:0;background:rgba(16,24,40,.45);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
+#modal.on{display:flex}
+#modal .card{max-width:560px;width:100%;max-height:90vh;overflow:auto}
+#modal .mrow{margin:14px 0}
+#modal .mrow h4{margin:0 0 6px}
+#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(30px);background:#1d2433;color:#fff;padding:10px 18px;border-radius:12px;opacity:0;transition:.25s;z-index:60;max-width:90vw;text-align:center}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* results */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.kpi .l{font-size:.85rem;color:var(--muted);font-weight:600}
+.kpi .v{font-size:1.7rem;font-weight:800;line-height:1.2}
+.kpi .n{font-size:.8rem;font-weight:700;margin-top:4px;display:inline-block;border-radius:6px;padding:0 8px}
+.n.ok{background:var(--ok-soft);color:var(--ok)} .n.bad{background:var(--bad-soft);color:var(--bad)} .n.warn{background:var(--warn-soft);color:var(--warn)}
+.sec-block{margin-bottom:18px}
+.tablewrap{overflow-x:auto}
+table.t{width:100%;border-collapse:collapse;font-size:.9rem;background:#fff}
+table.t th,table.t td{border:1px solid #9aa5b8;padding:5px 7px;text-align:center;vertical-align:middle}
+table.t thead th{background:#eef2f8;font-weight:700}
+table.t th.res{background:var(--res-soft);color:var(--res)} table.t th.comp{background:var(--comp-soft);color:var(--comp)}
+table.t td.grey{background:#c9ced8}
+table.t td.mark{font-weight:800;color:var(--pri);font-size:1.05rem}
+table.t tr.sum td{background:#f7f2e6;font-weight:800}
+table.t td.secn{font-weight:800;background:#fafbfd;writing-mode:horizontal-tb}
+table.t td.left{text-align:right}
+table.t td input{width:100%;border:1px solid var(--line);border-radius:6px;padding:3px 6px;text-align:center}
+table.t td input.name{text-align:right}
+.bars{display:flex;flex-direction:column;gap:8px}
+.bar{display:grid;grid-template-columns:80px 1fr 90px;gap:10px;align-items:center;font-size:.9rem}
+.bar .trk{background:var(--bg);border-radius:8px;height:22px;overflow:hidden}
+.bar .fill{height:100%;border-radius:8px}
+.bar .fill.res{background:var(--res)} .bar .fill.comp{background:var(--comp)}
+.bar b{font-weight:800}
+.concl{width:100%;min-height:300px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fbfdf8;line-height:1.9}
+.rhead{text-align:center;margin-bottom:16px}
+.rhead .org{color:var(--bad);font-weight:700}
+.rhead h2{font-size:1.45rem;margin:4px 0}
+.rhead .meta{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;color:var(--muted);font-size:.92rem}
+.foot{margin-top:28px;text-align:center;color:var(--muted);font-size:.85rem}
+
+@media print{
+  @page{size:A4;margin:10mm}
+  body{background:#fff;font-size:12px}
+  .noprint,.top{display:none!important}
+  main{padding:0;max-width:none}
+  .card{border:none;box-shadow:none;padding:0 0 10px}
+  .sec-block{break-inside:avoid}
+  table.t{font-size:10.5px}
+  .concl{border:none;min-height:0}
+}
+</style>
+</head>
+<body>
+<header class="top noprint">
+  <div>
+    <h1>تحليل مواضيع الاختبار</h1>
+    <div class="sub">التحليل الكمي والنوعي وفق التوزيع المتوازن لمؤشرات التقويم</div>
+  </div>
+  <div class="acts" id="topActs"></div>
+</header>
+<main id="app"></main>
+<div id="modal"></div>
+<div id="toast"></div>
+
+<script>
+/* ===================== ثوابت ===================== */
+const LEVELS=[
+  {k:'rem',n:'التذكر',d:'يتذكر / يعرف: استرجاع المعلومة',g:'res'},
+  {k:'und',n:'الفهم',d:'يعالج المعلومة',g:'res'},
+  {k:'app',n:'التطبيق',d:'يجنّد المعارف والاستراتيجيات في عائلة الوضعيات',g:'res'},
+  {k:'ana',n:'التحليل',d:'يصف كل المركبات',g:'comp'},
+  {k:'syn',n:'التركيب',d:'ينشئ طريقة، فكرة، إنتاج أصلي',g:'comp'},
+  {k:'eva',n:'التقويم',d:'يطبّق المعايير',g:'comp'}
+];
+const LV=Object.fromEntries(LEVELS.map(l=>[l.k,l]));
+const QLV=[1,2,3,4];
+const COMPS=[{k:'kn',n:'معرفية'},{k:'me',n:'منهجية'},{k:'va',n:'قيمية'}];
+const SANAD=[{k:'f',n:'وظيفية'},{k:'p',n:'وظيفية جزئيا'},{k:'n',n:'غير وظيفية'}];
+const ORD=['الأول','الثاني','الثالث','الرابع'];
+const IND_DEFAULT={
+  'الرابعة متوسط':[['الظواهر الكهربائية',20],['المادة وتحولاتها',17],['الظواهر الميكانيكية',25],['الظواهر الضوئية',14]]
+};
+const KEY='exam-analysis-v1';
+
+/* ===================== الحالة ===================== */
+function newState(){
+  return {screen:'start',
+    info:{org:'مفتشية العلوم الفيزيائية – المقاطعة 1',level:'الرابعة متوسط',subject:'العلوم الفيزيائية والتكنولوجيا',term:'الفصل الأول',year:'2026/2027',examNo:'',school:''},
+    exCount:2, detailed:false,
+    sections:[], cur:{s:0,q:0},
+    ind:IND_DEFAULT['الرابعة متوسط'].map(([name,total])=>({name,total,target:''})),
+    conclusion:null};
+}
+let S=load()||newState();
+function load(){try{const t=localStorage.getItem(KEY);return t?JSON.parse(t):null}catch(e){return null}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+
+function buildSections(){
+  const old=S.sections||[];
+  const exs=old.filter(s=>s.type==='ex'), integ=old.find(s=>s.type==='int');
+  const out=[];
+  for(let i=0;i<S.exCount;i++){
+    out.push(exs[i]||{type:'ex',qs:[],sanad:'',prog:'',nature:''});
+    out[i].name='التمرين '+ORD[i];
+  }
+  out.push(integ||{type:'int',qs:[],sanad:'',prog:'',nature:''});
+  out[out.length-1].name='الوضعية الإدماجية';
+  S.sections=out;
+  if(S.cur.s>=out.length) S.cur={s:0,q:0};
+}
+const allowed=sec=>sec.type==='int'?LEVELS:LEVELS.slice(0,3);
+const LIDX=Object.fromEntries(LEVELS.map((l,i)=>[l.k,i]));
+const covers=(q,k)=>!!(q&&q.level&&LIDX[k]<=LIDX[q.level]);
+const term=sec=>sec.type==='int'?'التعليمة':'السؤال';
+/* العدد مع المعدود: 1 سؤال، 2 سؤالان، 3–10 أسئلة، 11+ سؤالا */
+const FORMS={q:['سؤال','سؤالان','أسئلة','سؤالا'],t:['تعليمة','تعليمتان','تعليمات','تعليمة'],s:['خطوة ذهنية','خطوتان ذهنيتان','خطوات ذهنية','خطوة ذهنية']};
+function cnt(n,k){const f=FORMS[k];if(n===2)return f[1];if(n===1||n===0)return n+' '+f[0];const m=n%100;return n+' '+((m>=3&&m<=10)?f[2]:f[3])}
+const cntSec=(n,sec)=>cnt(n,sec.type==='int'?'t':'q');
+const isDone=q=>q&&q.level&&(!S.detailed||(q.qlevel&&q.comp));
+const valid=sec=>sec.qs.filter(q=>q&&q.level);
+
+/* ===================== أدوات ===================== */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pct=(n,t)=>t?Math.round(n/t*1000)/10:0;
+const fmt=p=>(Number.isInteger(p)?p:p.toFixed(1))+'%';
+function toast(m,ms=2600){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('on'),ms)}
+function render(){
+  save();
+  const a=$('#topActs');
+  if(S.screen==='start') a.innerHTML='';
+  else a.innerHTML=`<button class="tbtn" onclick="go('start')">⚙ معلومات الاختبار</button>
+    ${S.screen!=='work'?`<button class="tbtn" onclick="go('work')">✎ متابعة التحليل</button>`:''}
+    ${S.screen!=='results'?`<button class="tbtn" onclick="go('results')">📊 النتائج</button>`:''}`;
+  ({start:renderStart,work:renderWork,results:renderResults})[S.screen]();
+}
+function go(sc){S.screen=sc;if(sc!=='start')buildSections();render();window.scrollTo(0,0)}
+
+/* ===================== شاشة البداية ===================== */
+function renderStart(){
+  const has=(S.sections||[]).some(s=>valid(s).length);
+  const i=S.info;
+  $('#app').innerHTML=`
+  <div class="card">
+    <h2>معلومات موضوع الاختبار</h2>
+    <p class="muted">املأ المعلومات ثم ابدأ: يعرض البرنامج الأسئلة واحدا تلو الآخر، وتختار لكل سؤال مستواه المعرفي.</p>
+    <div class="grid2" style="margin-top:14px">
+      <label class="f">الجهة<input id="i_org" value="${esc(i.org)}"></label>
+      <label class="f">المستوى
+        <select id="i_level">${['الأولى متوسط','الثانية متوسط','الثالثة متوسط','الرابعة متوسط'].map(l=>`<option ${l===i.level?'selected':''}>${l}</option>`).join('')}</select></label>
+      <label class="f">المادة<input id="i_subject" value="${esc(i.subject)}"></label>
+      <label class="f">الاختبار
+        <select id="i_term">${['الفصل الأول','الفصل الثاني','الفصل الثالث','امتحان تجريبي','شهادة التعليم المتوسط'].map(l=>`<option ${l===i.term?'selected':''}>${l}</option>`).join('')}</select></label>
+      <label class="f">السنة الدراسية<input id="i_year" value="${esc(i.year)}"></label>
+      <label class="f">رقم الاختبار<input id="i_examNo" value="${esc(i.examNo)}" placeholder="مثلا: 03"></label>
+      <label class="f">المؤسسة (اختياري)<input id="i_school" value="${esc(i.school)}"></label>
+      <label class="f">عدد التمارين (قبل الوضعية الإدماجية)
+        <select id="i_ex">${[1,2,3,4].map(n=>`<option value="${n}" ${n===S.exCount?'selected':''}>${n}</option>`).join('')}</select></label>
+    </div>
+    <div class="grid2" style="margin-top:16px">
+      <label class="chk"><input type="checkbox" id="i_det" ${S.detailed?'checked':''}>
+        <span><b>إضافة التحليل النوعي</b><br><span class="muted" style="font-size:.88rem">لكل سؤال تختار أيضا مستوى السؤال (1–4) ومركّبة الكفاءة (معرفية/منهجية/قيمية).</span></span></label>
+
+    </div>
+    <div class="row" style="margin-top:22px">
+      <button class="btn big" onclick="startWork(false)">${has?'متابعة التحليل ←':'ابدأ التحليل ←'}</button>
+      ${has?`<button class="btn danger" onclick="resetAll()">بدء تحليل جديد (مسح الحالي)</button>`:''}
+    </div>
+  </div>`;
+}
+function readStart(){
+  ['org','level','subject','term','year','examNo','school'].forEach(k=>S.info[k]=$('#i_'+k).value.trim());
+  S.exCount=+$('#i_ex').value; S.detailed=$('#i_det').checked;
+  if(IND_DEFAULT[S.info.level] && S.ind.every(r=>r.target==='')){
+    S.ind=IND_DEFAULT[S.info.level].map(([name,total])=>({name,total,target:''}));
+  }
+}
+function startWork(){readStart();buildSections();S.screen='work';render()}
+function resetAll(){
+  openModal(`<h3>مسح التحليل الحالي؟</h3><p class="muted">ستُحذف كل الاختيارات السابقة.</p>
+   <div class="row"><button class="btn danger" onclick="S=newState();closeModal();render()">نعم، امسح</button><button class="btn ghost" onclick="closeModal()">إلغاء</button></div>`);
+}
+
+/* ===================== شاشة التحليل ===================== */
+function renderWork(){
+  const {s,q}=S.cur, sec=S.sections[s], cq=sec.qs[q]||null;
+  const isNew=!cq;
+  const label=cq?cq.label:String(q+1);
+  const lv=allowed(sec);
+  const steps=S.sections.map((x,i)=>`<button class="step ${i===s?'on':''} ${i<s&&valid(x).length?'done':''}" onclick="jumpSec(${i})"><b>${x.name}</b><span class="cnt">${cntSec(valid(x).length,x)}</span></button>`).join('');
+  let lvHtml='';
+  lv.forEach((l,i)=>{
+    if(i===0) lvHtml+=`<div class="grouplbl res">تقويم الموارد</div>`;
+    if(i===3) lvHtml+=`<div class="grouplbl comp">تقويم الكفاءة</div>`;
+    lvHtml+=`<button class="lv ${l.g} ${cq&&cq.level===l.k?'sel':(covers(cq,l.k)?'inc':'')}" data-k="${l.k}" onclick="pick('level','${l.k}',this)"><span class="key">${i+1}</span><span class="nm">${l.n}</span><span class="ds">${l.d}</span></button>`;
+  });
+  const det=S.detailed?`
+    <div class="subq"><h4>مستوى السؤال</h4><div class="chips">${QLV.map(n=>`<button class="chip ${cq&&cq.qlevel===n?'sel':''}" onclick="pick('qlevel',${n},this)">المستوى ${n}</button>`).join('')}</div></div>
+    <div class="subq"><h4>مركّبة الكفاءة</h4><div class="chips">${COMPS.map(c=>`<button class="chip ${cq&&cq.comp===c.k?'sel':''}" onclick="pick('comp','${c.k}',this)">${c.n}</button>`).join('')}</div></div>
+    <div class="subq"><h4>نص ${term(sec)} (اختياري)</h4><input class="txt" id="qtext" value="${esc(cq?cq.text:'')}" placeholder="اكتب نص ${term(sec)} أو جزءا منه" oninput="setText(this.value)"></div>`:'';
+  const last=s===S.sections.length-1;
+  const nextLbl=last?'إنهاء وعرض النتائج ✓':`انتقل إلى ${S.sections[s+1].name} ←`;
+  const list=sec.qs.map((x,i)=>{const L=LV[x.level];return `<li class="${i===q?'cur':''}"><button onclick="jumpQ(${i})"><span>${term(sec)} ${esc(x.label)}</span><span class="tag ${L?L.g:'none'}">${L?L.n:'—'}</span></button></li>`}).join('')
+    +`<li class="${isNew?'cur':''}"><button onclick="jumpQ(${sec.qs.length})"><span>+ ${term(sec)} جديد</span><span class="tag none">${sec.qs.length+1}</span></button></li>`;
+  const c=countSec(sec);
+  $('#app').innerHTML=`
+  <div class="steps">${steps}</div>
+  <div class="layout">
+    <section class="card">
+      <div class="qhead">
+        <span class="secname">${sec.name}</span>
+        <div class="qtitle">${term(sec)} <input id="qlabel" value="${esc(label)}" oninput="setLabel(this.value)" title="يمكنك تعديل الترقيم، مثلا 2-أ"></div>
+        ${!isNew?'<span class="editing">تعديل سؤال مُدخل</span>':''}
+      </div>
+      <p class="prompt">اختر أعلى مستوى معرفي يتطلبه هذا ${term(sec)}؛ تُختار المستويات التي تسبقه تلقائيا. ${sec.type==='ex'?'في التمارين: تقويم الموارد فقط.':''} ثم اضغط «${term(sec)} التالي».</p>
+      <div class="levels">${lvHtml}</div>
+      ${det}
+      <div class="navbar">
+        <button class="btn ghost" onclick="prevQ()" ${s===0&&q===0?'disabled':''}>→ رجوع</button>
+        ${!isNew?`<button class="btn soft" onclick="jumpQ(${sec.qs.length})">تخطَّ إلى ${term(sec)} جديد</button><button class="btn danger" onclick="delQ()">حذف</button>`:''}
+        <span class="spacer"></span>
+        <button class="btn big" onclick="nextQ()" ${isDone(cq)?'':'disabled'}>${term(sec)} التالي ←</button>
+        <button class="btn ghost" onclick="endSection()">${nextLbl}</button>
+      </div>
+      <div class="kbd noprint">اختصارات: الأرقام 1–${lv.length} لاختيار المستوى · Enter للسؤال التالي · Backspace للرجوع</div>
+    </section>
+    <aside class="card side">
+      <h3><span>${sec.name}</span><span class="muted" style="font-size:.9rem">${cnt(c.total,'s')}</span></h3>
+      <ul class="qlist">${list}</ul>
+      <div class="mini">
+        ${lv.map(l=>`<div><span>${l.n}</span><b style="color:var(--${l.g})">${c[l.k]}</b></div>`).join('')}
+      </div>
+    </aside>
+  </div>`;
+  const ql=$('#qlabel'); if(ql) ql.addEventListener('keydown',e=>e.stopPropagation());
+  const qt=$('#qtext'); if(qt) qt.addEventListener('keydown',e=>e.stopPropagation());
+}
+function curQ(create){
+  const {s,q}=S.cur, sec=S.sections[s];
+  if(!sec.qs[q]&&create){
+    const lbl=($('#qlabel')?.value||'').trim()||String(q+1);
+    sec.qs[q]={label:lbl,level:null,qlevel:null,comp:null,text:($('#qtext')?.value||'')};
+  }
+  return sec.qs[q];
+}
+let advTimer=null;
+function pick(field,val,el){
+  const cq=curQ(true); cq[field]=cq[field]===val?null:val;
+  if(el){el.parentElement.querySelectorAll('.sel').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');el.classList.add('flash')}
+  save();
+  render();
+}
+function setLabel(v){const cq=S.sections[S.cur.s].qs[S.cur.q];if(cq){cq.label=v.trim()||String(S.cur.q+1);save()}}
+function setText(v){const cq=curQ(true);cq.text=v;save()}
+function nextQ(){const cq=S.sections[S.cur.s].qs[S.cur.q];if(!isDone(cq)){toast(S.detailed?'أكمل الاختيارات أولا':'اختر المستوى المعرفي أولا');return}S.cur.q++;render();setTimeout(()=>$('#qlabel')?.focus(),0)}
+function jumpQ(i){clearTimeout(advTimer);S.cur.q=i;render()}
+function jumpSec(i){clearTimeout(advTimer);S.cur={s:i,q:S.sections[i].qs.length};render()}
+function prevQ(){
+  clearTimeout(advTimer);
+  if(S.cur.q>0){S.cur.q--;}
+  else if(S.cur.s>0){S.cur.s--;S.cur.q=Math.max(0,S.sections[S.cur.s].qs.length-1);}
+  render();
+}
+function delQ(){
+  const sec=S.sections[S.cur.s], q=S.cur.q;
+  sec.qs.splice(q,1);
+  for(let i=q;i<sec.qs.length;i++) if(sec.qs[i].label===String(i+2)) sec.qs[i].label=String(i+1);
+  render(); toast('تم حذف '+term(sec));
+}
+function cleanSec(sec){sec.qs=sec.qs.filter(q=>q&&q.level)}
+function endSection(){
+  clearTimeout(advTimer);
+  const s=S.cur.s, sec=S.sections[s];
+  cleanSec(sec);
+  const g=(field,opts,cls)=>`<div class="chips">${opts.map(o=>`<button class="chip ${cls?cls(o):''} ${sec[field]===o.k?'sel':''}" onclick="secPick('${field}','${o.k}',this)">${o.n}</button>`).join('')}</div>`;
+  const yn=[{k:'y',n:'نعم'},{k:'n',n:'لا'}];
+  openModal(`
+    <h3>تقييم ${sec.name}</h3>
+    <p class="muted">عدد المُدخل: ${cntSec(valid(sec).length,sec)}. أكمل هذه الخانات الخاصة بالتوزيع المتوازن (اختياري).</p>
+    <div class="mrow"><h4>اختيار السندات</h4>${g('sanad',SANAD)}</div>
+    <div class="mrow"><h4>الملاءمة مع البرنامج</h4>${g('prog',yn,o=>o.k==='y'?'yes':'no')}</div>
+    <div class="mrow"><h4>الملاءمة مع طبيعة الاختبار والدليل</h4>${g('nature',yn,o=>o.k==='y'?'yes':'no')}</div>
+    <div class="row" style="margin-top:18px">
+      <button class="btn" onclick="closeModal();afterSection()">${s===S.sections.length-1?'عرض النتائج':'متابعة إلى '+S.sections[s+1].name}</button>
+      <button class="btn ghost" onclick="closeModal();render()">البقاء في ${sec.name}</button>
+    </div>`);
+}
+function secPick(f,v,el){const sec=S.sections[S.cur.s];sec[f]=sec[f]===v?'':v;el.parentElement.querySelectorAll('.sel').forEach(b=>b.classList.remove('sel'));if(sec[f])el.classList.add('sel');save()}
+function afterSection(){
+  const s=S.cur.s;
+  if(s===S.sections.length-1){go('results');return}
+  S.cur={s:s+1,q:S.sections[s+1].qs.length};render();window.scrollTo(0,0);
+}
+document.addEventListener('keydown',e=>{
+  if(S.screen!=='work'||$('#modal').classList.contains('on'))return;
+  const sec=S.sections[S.cur.s], lv=allowed(sec);
+  const n=parseInt(e.key,10);
+  if(n>=1&&n<=lv.length){const el=document.querySelector(`.lv[data-k="${lv[n-1].k}"]`);pick('level',lv[n-1].k,el);e.preventDefault()}
+  else if(e.key==='Backspace'){prevQ();e.preventDefault()}
+  else if(e.key==='Enter'){nextQ();e.preventDefault()}
+});
+
+/* ===================== modal ===================== */
+function openModal(h){const m=$('#modal');m.innerHTML=`<div class="card">${h}</div>`;m.classList.add('on')}
+function closeModal(){$('#modal').classList.remove('on')}
+$('#modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal()});
+
+/* ===================== الحسابات ===================== */
+function countSec(sec){
+  const c={total:0}; LEVELS.forEach(l=>c[l.k]=0);
+  c.qs=0;
+  valid(sec).forEach(q=>{const x=LIDX[q.level];for(let i=0;i<=x;i++)c[LEVELS[i].k]++;c.total+=x+1;c.qs++});
+  return c;
+}
+function totals(){
+  const c={total:0}; LEVELS.forEach(l=>c[l.k]=0);
+  c.qs=0;
+  S.sections.forEach(s=>{const x=countSec(s);LEVELS.forEach(l=>c[l.k]+=x[l.k]);c.total+=x.total;c.qs+=x.qs});
+  c.easy=c.rem+c.und; c.med=c.app+c.ana; c.hard=c.syn+c.eva;
+  c.res=c.rem+c.und+c.app; c.comp=c.ana+c.syn+c.eva;
+  ['easy','med','hard','res','comp'].forEach(k=>c['p_'+k]=pct(c[k],c.total));
+  return c;
+}
+function verdicts(c){
+  const v={};
+  v.easy=c.p_easy<=60?['ok','مطابقة (لا تفوق 60%)']:['bad','تفوق 60%'];
+  v.med=c.p_med>=30?['ok','مطابقة (لا تقل عن 30%)']:['bad','أقل من 30%'];
+  v.hard=c.p_hard>=10?['ok','مطابقة (لا تقل عن 10%)']:['bad','أقل من 10%'];
+  const near=(p,t)=>Math.abs(p-t)<=5?['ok','متوازنة (≈'+t+'%)']:(p>t?['warn','أعلى من '+t+'%']:['warn','أقل من '+t+'%']);
+  v.res=near(c.p_res,60); v.comp=near(c.p_comp,40);
+  return v;
+}
+function autoConclusion(){
+  const c=totals(), v=verdicts(c);
+  if(!c.total) return 'لم تُدخل أي أسئلة بعد.';
+  const L=[];
+  L.push('من خلال التحليل الكمي لموضوع الاختبار نلاحظ ما يلي:');
+  L.push(`• عدد الأسئلة: ${c.qs}، موزعة كما يلي: `+S.sections.map(s=>`${s.name} (${valid(s).length})`).join('، ')+'.');
+  L.push(`• عدد المهمات الكلي (الخطوات الذهنية): ${c.total}، مع احتساب كل مستوى معرفي مع المستويات التي تسبقه.`);
+  L.push(`• الأسئلة السهلة (تذكر + فهم): ${c.easy} مهمة بنسبة ${fmt(c.p_easy)} — ${c.p_easy<=60?'لا تفوق 60% وهي مطابقة للمعيار':'تفوق 60%، ويُستحسن تقليصها'}.`);
+  L.push(`• الأسئلة المتوسطة (تطبيق + تحليل): ${c.med} مهمة بنسبة ${fmt(c.p_med)} — ${c.p_med>=30?'لا تقل عن 30% وهي مطابقة للمعيار':'تقل عن 30%، ويُستحسن رفعها'}.`);
+  L.push(`• الأسئلة الصعبة (تركيب + تقويم): ${c.hard} مهمة بنسبة ${fmt(c.p_hard)} — ${c.p_hard>=10?'لا تقل عن 10% وهي مطابقة للمعيار':'تقل عن 10%، ويُستحسن رفعها'}.`);
+  L.push(`• تقويم الموارد: ${fmt(c.p_res)} مقابل 60% مطلوبة، وتقويم الكفاءة: ${fmt(c.p_comp)} مقابل 40% مطلوبة — ${v.res[0]==='ok'?'التوزيع متوازن':'التوزيع غير متوازن، '+(c.p_res>60?'مع غلبة أسئلة الموارد':'مع غلبة أسئلة الكفاءة')}.`);
+  const missing=LEVELS.filter(l=>!c[l.k]).map(l=>l.n);
+  if(missing.length) L.push(`• مستويات غائبة عن الموضوع: ${missing.join('، ')}.`);
+  const nf=S.sections.filter(s=>s.sanad==='n').map(s=>s.name), pf=S.sections.filter(s=>s.sanad==='p').map(s=>s.name);
+  if(nf.length) L.push(`• السندات غير وظيفية في: ${nf.join('، ')}.`);
+  if(pf.length) L.push(`• السندات وظيفية جزئيا في: ${pf.join('، ')}.`);
+  const np=S.sections.filter(s=>s.prog==='n').map(s=>s.name);
+  if(np.length) L.push(`• عدم ملاءمة مع البرنامج في: ${np.join('، ')}.`);
+  const nn=S.sections.filter(s=>s.nature==='n').map(s=>s.name);
+  if(nn.length) L.push(`• عدم ملاءمة مع طبيعة الاختبار والدليل في: ${nn.join('، ')}.`);
+  const ok=['easy','med','hard'].every(k=>v[k][0]==='ok')&&v.res[0]==='ok';
+  L.push(ok?'الخلاصة: الموضوع متوازن ويحترم معايير التوزيع المطلوبة.':'الخلاصة: الموضوع يحتاج إلى مراجعة توزيع الأسئلة حتى يحترم المعايير المطلوبة.');
+  return L.join('\n');
+}
+
+/* ===================== النتائج ===================== */
+const mark=b=>b?'✓':'';
+function renderResults(){
+  buildSections(); S.sections.forEach(cleanSec);
+  const c=totals(), v=verdicts(c), i=S.info;
+  const lvHead=LEVELS.map(l=>`<th class="${l.g}">${l.n}</th>`).join('');
+  // جدول 1: التحليل الكمي
+  let body='';
+  S.sections.forEach(sec=>{
+    const qs=valid(sec), cs=countSec(sec), lim=allowed(sec).length;
+    if(!qs.length){body+=`<tr><td class="secn">${sec.name}</td><td colspan="7" class="muted">— لا توجد أسئلة —</td></tr>`;return}
+    qs.forEach((q,j)=>{
+      body+=`<tr>${j===0?`<td class="secn" rowspan="${qs.length+1}">${sec.name}</td>`:''}<td class="left">${term(sec)} ${esc(q.label)}${q.text?` <span class="muted">— ${esc(q.text)}</span>`:''}</td>`+
+        LEVELS.map((l,k)=>k>=lim?'<td class="grey"></td>':`<td class="mark">${mark(covers(q,l.k))}</td>`).join('')+'</tr>';
+    });
+    body+=`<tr class="sum"><td>المجموع =</td>${LEVELS.map((l,k)=>k>=lim?'<td class="grey"></td>':`<td>${cs[l.k]}</td>`).join('')}</tr>`;
+  });
+  const quant=`<table class="t"><thead>
+     <tr><th rowspan="2">الوضعية</th><th rowspan="2">السؤال / التعليمة</th><th colspan="3" class="res">تقويم الموارد</th><th colspan="3" class="comp">تقويم الكفاءة</th></tr>
+     <tr>${lvHead}</tr></thead><tbody>${body}</tbody></table>`;
+  const nb=x=>`<span class="n ${x[0]}">${x[1]}</span>`;
+  const summ=`<table class="t"><tbody>
+    <tr><th rowspan="4" style="width:90px">التحليل الكمي</th><th>مستوى الأسئلة</th><th>سهلة لا تفوق (60%)<br><small>تذكر + فهم</small></th><th>متوسطة لا تقل (30%)<br><small>تطبيق + تحليل</small></th><th>صعبة لا تقل (10%)<br><small>تركيب + تقويم</small></th></tr>
+    <tr><td>عدد المهمات</td><td>${c.easy}</td><td>${c.med}</td><td>${c.hard}</td></tr>
+    <tr><td>النسبة المئوية</td><td><b>${fmt(c.p_easy)}</b></td><td><b>${fmt(c.p_med)}</b></td><td><b>${fmt(c.p_hard)}</b></td></tr>
+    <tr><td>الحكم</td><td>${nb(v.easy)}</td><td>${nb(v.med)}</td><td>${nb(v.hard)}</td></tr>
+    <tr><th rowspan="4">التقويم</th><th>تقويم</th><th colspan="2">الموارد (60%)</th><th>الكفاءة (40%)</th></tr>
+    <tr><td>عدد المهمات</td><td colspan="2">${c.res}</td><td>${c.comp}</td></tr>
+    <tr><td>النسبة المئوية</td><td colspan="2"><b>${fmt(c.p_res)}</b></td><td><b>${fmt(c.p_comp)}</b></td></tr>
+    <tr><td>الحكم</td><td colspan="2">${nb(v.res)}</td><td>${nb(v.comp)}</td></tr>
+  </tbody></table>`;
+  // جدول 2: التوزيع المتوازن
+  const yn=x=>x==='y'?['1',''] : x==='n'?['','1']:['',''];
+  let b2='', tot={sf:0,sp:0,sn:0,py:0,pn:0,ny:0,nn:0};
+  S.sections.forEach(sec=>{
+    const cs=countSec(sec), lim=allowed(sec).length, p=yn(sec.prog), n=yn(sec.nature);
+    tot.sf+=sec.sanad==='f';tot.sp+=sec.sanad==='p';tot.sn+=sec.sanad==='n';tot.py+=p[0]==='1';tot.pn+=p[1]==='1';tot.ny+=n[0]==='1';tot.nn+=n[1]==='1';
+    b2+=`<tr><td class="secn">${sec.name}</td>${LEVELS.map((l,k)=>k>=lim?'<td class="grey"></td>':`<td>${cs[l.k]||''}</td>`).join('')}
+      <td>${sec.sanad==='f'?1:''}</td><td>${sec.sanad==='p'?1:''}</td><td>${sec.sanad==='n'?1:''}</td>
+      <td>${p[0]}</td><td>${p[1]}</td><td>${n[0]}</td><td>${n[1]}</td></tr>`;
+  });
+  b2+=`<tr class="sum"><td>المجموع</td>${LEVELS.map(l=>`<td>${c[l.k]}</td>`).join('')}<td>${tot.sf}</td><td>${tot.sp}</td><td>${tot.sn}</td><td>${tot.py}</td><td>${tot.pn}</td><td>${tot.ny}</td><td>${tot.nn}</td></tr>
+       <tr class="sum"><td>المجموع الكلي للخطوات الذهنية (التفكيرية)</td><td colspan="6">${c.total}</td><td colspan="7"></td></tr>`;
+  const bal=`<table class="t"><thead>
+    <tr><th rowspan="2">الوصف</th><th colspan="6">نمط السؤال (عدد المرات)</th><th colspan="3">اختيار السندات</th><th colspan="2">الملاءمة مع البرنامج</th><th colspan="2">الملاءمة مع طبيعة الاختبار والدليل</th></tr>
+    <tr>${lvHead}<th>وظيفية</th><th>وظيفية جزئيا</th><th>غير وظيفية</th><th>نعم</th><th>لا</th><th>نعم</th><th>لا</th></tr></thead><tbody>${b2}</tbody></table>`;
+  // جدول 3: التحليل النوعي
+  let qual='';
+  if(S.detailed){
+    let b3='';
+    S.sections.forEach(sec=>{
+      const qs=valid(sec);
+      if(!qs.length) return;
+      qs.forEach((q,j)=>{
+        b3+=`<tr>${j===0?`<td class="secn" rowspan="${qs.length}">${sec.name}</td>`:''}<td>${esc(q.label)}</td><td class="left">${esc(q.text)}</td>
+          ${LEVELS.map(l=>`<td class="mark">${mark(covers(q,l.k))}</td>`).join('')}
+          ${QLV.map(n=>`<td class="mark">${mark(q.qlevel===n)}</td>`).join('')}
+          ${COMPS.map(x=>`<td class="mark">${mark(q.comp===x.k)}</td>`).join('')}</tr>`;
+      });
+    });
+    const qc=QLV.map(n=>S.sections.reduce((a,s)=>a+valid(s).filter(q=>q.qlevel===n).length,0));
+    const cc=COMPS.map(x=>S.sections.reduce((a,s)=>a+valid(s).filter(q=>q.comp===x.k).length,0));
+    b3+=`<tr class="sum"><td colspan="3">المجموع</td>${LEVELS.map(l=>`<td>${c[l.k]}</td>`).join('')}${qc.map(n=>`<td>${n}</td>`).join('')}${cc.map(n=>`<td>${n}</td>`).join('')}</tr>`;
+    qual=`<div class="card sec-block"><h3>التحليل النوعي لموضوع الاختبار</h3><div class="tablewrap"><table class="t"><thead>
+      <tr><th rowspan="2">الوضعية</th><th rowspan="2">السؤال</th><th rowspan="2">التعليمة</th><th colspan="6">المستويات المعرفية</th><th colspan="4">مستويات الأسئلة</th><th colspan="3">مركّبات الكفاءة</th></tr>
+      <tr>${lvHead}${QLV.map(n=>`<th>المستوى ${n}</th>`).join('')}${COMPS.map(x=>`<th>${x.n}</th>`).join('')}</tr></thead><tbody>${b3}</tbody></table></div></div>`;
+  }
+  // جدول 4: مؤشرات التقويم
+  const indRows=S.ind.map((r,k)=>`<tr data-k="${k}"><td><input class="name" value="${esc(r.name)}" oninput="indSet(${k},'name',this.value)"></td>
+     <td><input type="number" min="0" value="${esc(r.total)}" oninput="indSet(${k},'total',this.value)"></td>
+     <td><input type="number" min="0" value="${esc(r.target)}" placeholder="—" oninput="indSet(${k},'target',this.value)"></td>
+     <td class="ipct">${indPct(r)}</td><td class="noprint"><button class="chip" onclick="indDel(${k})" title="حذف">✕</button></td></tr>`).join('');
+  const ind=`<table class="t" id="indT"><thead><tr><th>المقطع التعلّمي</th><th>عدد مؤشرات التقويم</th><th>عدد المؤشرات المستهدفة</th><th>النسبة المئوية</th><th class="noprint"></th></tr></thead>
+    <tbody>${indRows}<tr class="sum"><td>عدد المؤشرات الكلية</td><td id="indTot">${indTotals().t}</td><td id="indTar">${indTotals().g}</td><td id="indP">${indTotals().p}</td><td class="noprint"></td></tr></tbody></table>
+    <button class="btn soft noprint" style="margin-top:10px" onclick="indAdd()">+ إضافة مقطع</button>`;
+  // مخطط
+  const maxv=Math.max(1,...LEVELS.map(l=>c[l.k]));
+  const bars=LEVELS.map(l=>`<div class="bar"><span>${l.n}</span><div class="trk"><div class="fill ${l.g}" style="width:${c[l.k]/maxv*100}%"></div></div><span><b>${c[l.k]}</b> · ${fmt(pct(c[l.k],c.total))}</span></div>`).join('');
+  const kpi=(l,val,n)=>`<div class="kpi"><div class="l">${l}</div><div class="v">${val}</div>${n?`<span class="n ${n[0]}">${n[1]}</span>`:''}</div>`;
+  const concl=S.conclusion??autoConclusion();
+  $('#app').innerHTML=`
+  <div class="row noprint" style="margin-bottom:14px">
+    <button class="btn" onclick="doPrint()">🖨 طباعة</button>
+    <button class="btn soft" onclick="copyReport()">⧉ نسخ الجداول (للصق في Word)</button>
+    <span class="spacer"></span>
+    <button class="btn ghost" onclick="go('work')">✎ تعديل الأسئلة</button>
+  </div>
+  <div id="report">
+    <div class="rhead">
+      <div class="org">${esc(i.org)}</div>
+      <h2>التحليل الكمي والنوعي لموضوع اختبار ${esc(i.term)}</h2>
+      <div class="meta"><span>المادة: ${esc(i.subject)}</span><span>المستوى: ${esc(i.level)}</span><span>السنة الدراسية: ${esc(i.year)}</span>${i.examNo?`<span>رقم الاختبار: ${esc(i.examNo)}</span>`:''}${i.school?`<span>${esc(i.school)}</span>`:''}</div>
+    </div>
+    <div class="kpis">
+      ${kpi('عدد الأسئلة',c.qs)}
+      ${kpi('الخطوات الذهنية',c.total)}
+      ${kpi('سهلة',fmt(c.p_easy),v.easy)}
+      ${kpi('متوسطة',fmt(c.p_med),v.med)}
+      ${kpi('صعبة',fmt(c.p_hard),v.hard)}
+      ${kpi('تقويم الموارد',fmt(c.p_res),v.res)}
+      ${kpi('تقويم الكفاءة',fmt(c.p_comp),v.comp)}
+    </div>
+    <div class="card sec-block"><h3>توزيع المهمات حسب المستويات المعرفية</h3><div class="bars">${bars}</div></div>
+    <div class="card sec-block"><h3>التحليل الكمي لموضوع الاختبار</h3><div class="tablewrap">${quant}</div><div class="tablewrap" style="margin-top:14px">${summ}</div></div>
+    <div class="card sec-block"><h3>التحليل حسب التوزيع المتوازن لمؤشرات التقويم</h3><div class="tablewrap">${bal}</div></div>
+    ${qual}
+    <div class="card sec-block"><h3>مؤشرات التقويم حسب المقاطع التعلّمية</h3><p class="muted noprint" style="margin-top:-6px">أدخل عدد المؤشرات المستهدفة في الموضوع لكل مقطع (تُستخرج من المنهاج). القيم الافتراضية خاصة بالرابعة متوسط ويمكن تعديلها.</p><div class="tablewrap">${ind}</div></div>
+    <div class="card sec-block"><h3 class="row"><span>الخلاصة</span><span class="spacer"></span><button class="btn soft noprint" style="padding:4px 12px;font-size:.85rem" onclick="S.conclusion=null;render()">↻ إعادة توليد</button></h3>
+      <textarea class="concl" id="concl" oninput="S.conclusion=this.value;save()">${esc(concl)}</textarea>
+      <div class="concl" id="conclPrint" style="display:none;white-space:pre-wrap"></div>
+    </div>
+  </div>
+  <div class="foot noprint">تُحفظ الاختيارات تلقائيا في هذا المتصفح.</div>`;
+}
+function indPct(r){const t=+r.total,g=+r.target;return (t&&r.target!=='')?fmt(pct(g,t)):'—'}
+function indTotals(){const t=S.ind.reduce((a,r)=>a+(+r.total||0),0),g=S.ind.reduce((a,r)=>a+(+r.target||0),0),any=S.ind.some(r=>r.target!=='');return{t,g:any?g:'—',p:any&&t?fmt(pct(g,t)):'—'}}
+function indSet(k,f,v){S.ind[k][f]=f==='name'?v:(v===''?'':+v);save();
+  const tr=document.querySelector(`#indT tr[data-k="${k}"] .ipct`);if(tr)tr.textContent=indPct(S.ind[k]);
+  const T=indTotals();$('#indTot').textContent=T.t;$('#indTar').textContent=T.g;$('#indP').textContent=T.p;}
+function indAdd(){S.ind.push({name:'مقطع جديد',total:0,target:''});render()}
+function indDel(k){S.ind.splice(k,1);render()}
+
+/* ===================== طباعة ونسخ ===================== */
+function prepPrint(){const t=$('#concl'),p=$('#conclPrint');if(t&&p){p.textContent=t.value}}
+window.addEventListener('beforeprint',()=>{prepPrint();const t=$('#concl'),p=$('#conclPrint');if(t){t.style.display='none';p.style.display='block'}});
+window.addEventListener('afterprint',()=>{const t=$('#concl'),p=$('#conclPrint');if(t){t.style.display='';p.style.display='none'}});
+function doPrint(){
+  let framed=false;try{framed=window.self!==window.top}catch(e){framed=true}
+  if(framed){toast('الطباعة غير متاحة داخل نافذة العرض: افتح الملف في المتصفح مباشرة ثم اطبع (Ctrl+P)، أو انسخ الجداول والصقها في Word.',6000);return}
+  try{window.print()}catch(e){toast('تعذّرت الطباعة من هنا.')}
+}
+function reportClone(){
+  prepPrint();
+  const r=$('#report').cloneNode(true);
+  r.querySelectorAll('.bars').forEach(x=>x.closest('.sec-block').remove());
+  r.querySelectorAll('.noprint,.kpis').forEach(x=>x.remove());
+  r.querySelectorAll('input').forEach(x=>{const s=document.createElement('span');s.textContent=x.value;x.replaceWith(s)});
+  const ta=r.querySelector('#concl'); if(ta) ta.remove();
+  const cp=r.querySelector('#conclPrint'); if(cp){cp.style.display='block';cp.innerHTML=esc($('#concl').value).replace(/\n/g,'<br>')}
+  r.querySelectorAll('table').forEach(t=>{t.setAttribute('border','1');t.setAttribute('dir','rtl');t.style.borderCollapse='collapse';t.style.width='100%'});
+  r.querySelectorAll('td.grey').forEach(td=>td.style.background='#c9ced8');
+  r.querySelectorAll('th,td').forEach(x=>{x.style.border='1px solid #555';x.style.padding='3px 6px';x.style.textAlign='center'});
+  return r;
+}
+async function copyReport(){
+  const r=reportClone();
+  const html=`<div dir="rtl" style="font-family:Arial">${r.innerHTML}</div>`;
+  const text=r.innerText;
+  try{
+    await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([html],{type:'text/html'}),'text/plain':new Blob([text],{type:'text/plain'})})]);
+    toast('نُسخت الجداول ✓ — الصقها في Word (Ctrl+V).');
+  }catch(e){
+    try{await navigator.clipboard.writeText(text);toast('نُسخ النص (بدون تنسيق الجداول).')}
+    catch(e2){toast('تعذّر النسخ في هذا المتصفح.')}
+  }
+}
+
+render();
+</script>
+</body>
+</html>
